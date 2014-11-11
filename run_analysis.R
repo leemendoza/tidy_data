@@ -1,3 +1,5 @@
+library(data.table)
+
 ##############################################################################
 # The purpose of this project is to demonstrate your ability to collect, 
 # work with, and clean a data set. The goal is to prepare tidy data that 
@@ -24,13 +26,15 @@
 ## From the data set in step 4, creates a second, independent tidy data set with the average of each variable for each activity and each subject
 
 ## get to the working directory
-setwd("c:\\github\\tidy_data")
+if (getwd() != ".\\github\\tidy_data"){
+    setwd(".\\github\\tidy_data")
+}
 
 ######################################################################
 ### do this only once!! I've already done it, so don't do it again!!
-# if (!file.exists(".\\data")){
+#if (!file.exists(".\\data")){
 #     dir.create(".\\data")
-# }
+#}
 # 
 ### the source data set is located here. unzip into the .\data folder
 # download.file("https://d396qusza40orc.cloudfront.net/getdata%2Fprojectfiles%2FUCI%20HAR%20Dataset.zip", destfile = ".\\data\\dataset.zip", mode = "wb")
@@ -42,3 +46,18 @@ setwd("c:\\github\\tidy_data")
 ## Jorge L. Reyes-Ortiz. Human Activity Recognition on Smartphones 
 ## using a Multiclass Hardware-Friendly Support Vector Machine. International 
 ## Workshop of Ambient Assisted Living (IWAAL 2012). Vitoria-Gasteiz, Spain. Dec 2012
+
+## The steps for creating the data set are as follows:
+# 1) Merges the training and the test sets to create one data set.
+
+# read the training set...
+dt_training = read.table(".\\data\\train\\X_train.txt")
+
+# read the test set...
+dt_test = read.table(".\\data\\train\\X_test.txt") 
+
+# create combined set
+# 2) Extracts only the measurements on the mean and standard deviation for each measurement. 
+# 3) Uses descriptive activity names to name the activities in the data set
+# 4) Appropriately labels the data set with descriptive variable names. 
+# 5) From the data set in step 4, creates a second, independent tidy data set with the average of each variable for each activity and each subject.
