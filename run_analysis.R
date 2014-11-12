@@ -26,9 +26,7 @@ library(data.table)
 ## From the data set in step 4, creates a second, independent tidy data set with the average of each variable for each activity and each subject
 
 ## get to the working directory
-if (getwd() != ".\\github\\tidy_data"){
-    setwd(".\\github\\tidy_data")
-}
+setwd(".\\github\\tidy_data")
 
 ######################################################################
 ### do this only once!! I've already done it, so don't do it again!!
@@ -54,10 +52,63 @@ if (getwd() != ".\\github\\tidy_data"){
 dt_training = read.table(".\\data\\train\\X_train.txt")
 
 # read the test set...
-dt_test = read.table(".\\data\\train\\X_test.txt") 
+dt_test = read.table(".\\data\\test\\X_test.txt") 
 
 # create combined set
+dt_combined = rbind(dt_training, dt_test)
+
+# free some memory
+rm(dt_training)
+rm(dt_test)
+
 # 2) Extracts only the measurements on the mean and standard deviation for each measurement. 
+# let's use the features.txt file to apply names to the columns. The names in 
+# features.text indicate mean, std, and other values. This step actually performs 
+# step 4 below, in which we label the data set with descriptive variable names
+dt_names=read.table(".\\data\\features.txt")
+names(dt_combined) = dt_names[,2]
+
+# now get only columns with mean or std in the name
+targetCols = grep("-mean()|-std()", dt_names$V2)
+dt_extracted = dt_combined[,targetCols]
+
+# remove the meanFreq columns - I reason that since there is no corresponding
+# stdFreq columns, these measures are fundamentally different from those
+# demarked as mean() and std()
+dt_extracted = dt_extracted[,which(!grepl("meanFreq()", colnames(dt_extracted))) ]
+
 # 3) Uses descriptive activity names to name the activities in the data set
+# read the training activities
+dt_training_activities = read.table(".\\data\\train\\y_train.txt")
+# read the test activities
+dt_test_activities = read.table(".\\data\\test\\y_test.txt")
+# combine the two
+dt_combined_activities = rbind(dt_training_activities, dt_test_activities)
+# substitute values, don't merge. Merge will reorder the values, and we want 
+# to preserve order so we can add this column to the rest of the data
+# from activity_labels.txt
+# 1 WALKING
+# 2 WALKING_UPSTAIRS
+# 3 WALKING_DOWNSTAIRS
+# 4 SITTING
+# 5 STANDING
+# 6 LAYING
+dt_combined_activities$V1[dt_combined_activities$V1==1] = "WALKING"
+dt_combined_activities$V1[dt_combined_activities$V1==2] = "WALKING_UPSTAIRS"
+dt_combined_activities$V1[dt_combined_activities$V1==3] = "WALKING_DOWNSTAIRS"
+dt_combined_activities$V1[dt_combined_activities$V1==4] = "SITTING"
+dt_combined_activities$V1[dt_combined_activities$V1==5] = "STANDING"
+dt_combined_activities$V1[dt_combined_activities$V1==6] = "LAYING"
+names(dt_combined_activities) = "Activity"
+# add the activity labels to the dataset
+dt_extracted = cbind(dt_combined_activities, dt_extracted)
+
 # 4) Appropriately labels the data set with descriptive variable names. 
-# 5) From the data set in step 4, creates a second, independent tidy data set with the average of each variable for each activity and each subject.
+# this was done in step 2 in this line - names(dt_combined) = dt_names[,2]
+
+# 5) From the data set in step 4, creates a second, independent tidy data set 
+# with the average of each variable for each activity and each subject.
+
+# get the subject numbers
+
+# add to data set
