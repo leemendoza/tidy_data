@@ -76,11 +76,15 @@ dt_extracted = dt_combined[,targetCols]
 # stdFreq columns, these measures are fundamentally different from those
 # demarked as mean() and std()
 dt_extracted = dt_extracted[,which(!grepl("meanFreq()", colnames(dt_extracted))) ]
-# cleanup data no longer needed
-rm(dt_names)
+# cleanup data no longer needed, but keep the dt_names around for step 4...
+# rm(dt_names)
 rm(dt_combined)
 
 # 3) Uses descriptive activity names to name the activities in the data set
+###### Note this is not the most efficient way to perform this step. A more 
+###### efficient method would be to perform this step on the collapsed data
+###### (the data in the final step) with only 180 observations, rather than
+###### on the raw data. Nonetheless, this is how we do it....
 # read the training activities
 dt_training_activities = read.table(".\\data\\train\\y_train.txt")
 # read the test activities
@@ -133,6 +137,8 @@ dt_extracted = cbind(dt_combined_subs, dt_extracted)
 # The aggregate function will create the average of each variable
 #for each activity and each subject
 aggdata <-aggregate( . ~ Subject + Activity, data =dt_extracted, FUN=mean)
+# save the aggregated data to a file. This file can be read using
+# data = read.csv("ActivityMeans.csv")
 write.csv(aggdata, "ActivityMeans.csv", row.names=FALSE)
 
 # cleanup data no longer needed
