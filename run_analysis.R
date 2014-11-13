@@ -76,6 +76,9 @@ dt_extracted = dt_combined[,targetCols]
 # stdFreq columns, these measures are fundamentally different from those
 # demarked as mean() and std()
 dt_extracted = dt_extracted[,which(!grepl("meanFreq()", colnames(dt_extracted))) ]
+# cleanup data no longer needed
+rm(dt_names)
+rm(dt_combined)
 
 # 3) Uses descriptive activity names to name the activities in the data set
 # read the training activities
@@ -84,6 +87,7 @@ dt_training_activities = read.table(".\\data\\train\\y_train.txt")
 dt_test_activities = read.table(".\\data\\test\\y_test.txt")
 # combine the two
 dt_combined_activities = rbind(dt_training_activities, dt_test_activities)
+
 # substitute values, don't merge. Merge will reorder the values, and we want 
 # to preserve order so we can add this column to the rest of the data
 # from activity_labels.txt
@@ -103,6 +107,11 @@ names(dt_combined_activities) = "Activity"
 # add the activity labels to the dataset
 dt_extracted = cbind(dt_combined_activities, dt_extracted)
 
+# cleanup data no longer needed
+rm(dt_training_activities)
+rm(dt_test_activities)
+rm(dt_combined_activities)
+
 # 4) Appropriately labels the data set with descriptive variable names. 
 # this was done in step 2 in this line - names(dt_combined) = dt_names[,2]
 
@@ -110,5 +119,24 @@ dt_extracted = cbind(dt_combined_activities, dt_extracted)
 # with the average of each variable for each activity and each subject.
 
 # get the subject numbers
+# read the training activities
+dt_training_subs = read.table(".\\data\\train\\subject_train.txt")
+# read the test activities
+dt_test_subs = read.table(".\\data\\test\\subject_test.txt")
+# combine the two
+dt_combined_subs = rbind(dt_training_subs, dt_test_subs)
+names(dt_combined_subs) = "Subject"
 
-# add to data set
+# add the subject labels to the dataset
+dt_extracted = cbind(dt_combined_subs, dt_extracted)
+
+# The aggregate function will create the average of each variable
+#for each activity and each subject
+aggdata <-aggregate( . ~ Subject + Activity, data =dt_extracted, FUN=mean)
+write.csv(aggdata, "ActivityMeans.csv", row.names=FALSE)
+
+# cleanup data no longer needed
+rm(dt_training_subs)
+rm(dt_test_subs)
+rm(dt_combined_subs)
+rm(dt_extracted)
