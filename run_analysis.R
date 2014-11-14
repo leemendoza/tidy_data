@@ -63,7 +63,7 @@ rm(dt_test)
 
 # 2) Extracts only the measurements on the mean and standard deviation for each measurement. 
 # let's use the features.txt file to apply names to the columns. The names in 
-# features.text indicate mean, std, and other values. This step actually performs 
+# features.text indicate mean, std, and other values. This step is the basis for 
 # step 4 below, in which we label the data set with descriptive variable names
 dt_names=read.table(".\\data\\features.txt")
 names(dt_combined) = dt_names[,2]
@@ -72,13 +72,13 @@ names(dt_combined) = dt_names[,2]
 targetCols = grep("-mean()|-std()", dt_names$V2)
 dt_extracted = dt_combined[,targetCols]
 
-# remove the meanFreq columns - I reason that since there is no corresponding
+# remove the meanFreq variables - I reason that since there is no corresponding
 # stdFreq columns, these measures are fundamentally different from those
 # demarked as mean() and std()
 dt_extracted = dt_extracted[,which(!grepl("meanFreq()", colnames(dt_extracted))) ]
-# cleanup data no longer needed, but keep the dt_names around for step 4...
+# cleanup data which are no longer needed
 # rm(dt_names)
-rm(dt_combined)
+# rm(dt_combined)
 
 # 3) Uses descriptive activity names to name the activities in the data set
 ###### Note this is not the most efficient way to perform this step. A more 
@@ -117,12 +117,17 @@ rm(dt_test_activities)
 rm(dt_combined_activities)
 
 # 4) Appropriately labels the data set with descriptive variable names. 
-# this was done in step 2 in this line - names(dt_combined) = dt_names[,2]
-
+# get the names of the columns
+varNames = colnames(dt_extracted)
+varNames[substring(varNames, 1, 1) == "t"] = function () { paste("Time domain", 
 # 5) From the data set in step 4, creates a second, independent tidy data set 
 # with the average of each variable for each activity and each subject.
 
-# get the subject numbers
+# get the subject numbers - the following files contain the number values
+# used to identify each subject. Each line contains one number, which is the 
+# identifier of the subject generating the data on the corresponding line
+# in the corresponding data file. Each subject is assigned a unique number, 
+# regardless of training or test group
 # read the training activities
 dt_training_subs = read.table(".\\data\\train\\subject_train.txt")
 # read the test activities
