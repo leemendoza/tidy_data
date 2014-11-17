@@ -25,16 +25,10 @@ library(data.table)
 
 ## From the data set in step 4, creates a second, independent tidy data set with the average of each variable for each activity and each subject
 
-## get to the working directory
-setwd(".\\github\\tidy_data")
 
 ######################################################################
-### do this only once!! I've already done it, so don't do it again!!
-#if (!file.exists(".\\data")){
-#     dir.create(".\\data")
-#}
-# 
-### the source data set is located here. unzip into the .\data folder
+
+### the source data set is located here. unzip into the working directory
 # download.file("https://d396qusza40orc.cloudfront.net/getdata%2Fprojectfiles%2FUCI%20HAR%20Dataset.zip", destfile = ".\\data\\dataset.zip", mode = "wb")
 ## the file describing the data is found here
 # browseURL("http://archive.ics.uci.edu/ml/datasets/Human+Activity+Recognition+Using+Smartphones")
@@ -49,10 +43,10 @@ setwd(".\\github\\tidy_data")
 # 1) Merges the training and the test sets to create one data set.
 
 # read the training set...
-dt_training = read.table(".\\data\\train\\X_train.txt")
+dt_training = read.table(".\\train\\X_train.txt")
 
 # read the test set...
-dt_test = read.table(".\\data\\test\\X_test.txt") 
+dt_test = read.table(".\\test\\X_test.txt") 
 
 # create combined set
 dt_combined = rbind(dt_training, dt_test)
@@ -65,11 +59,14 @@ rm(dt_test)
 # let's use the features.txt file to apply names to the columns. The names in 
 # features.text indicate mean, std, and other values. This step is the basis for 
 # step 4 below, in which we label the data set with descriptive variable names
-dt_names=read.table(".\\data\\features.txt")
+dt_names=read.table(".\\features.txt")
+# apply all the names from the feature file to all the columns
 names(dt_combined) = dt_names[,2]
 
 # now get only columns with mean or std in the name
+# - determine which names have mean or std in the string
 targetCols = grep("-mean()|-std()", dt_names$V2)
+# - and subset the data table accordingly
 dt_extracted = dt_combined[,targetCols]
 
 # remove the meanFreq variables - I reason that since there is no corresponding
@@ -77,8 +74,9 @@ dt_extracted = dt_combined[,targetCols]
 # demarked as mean() and std()
 dt_extracted = dt_extracted[,which(!grepl("meanFreq()", colnames(dt_extracted))) ]
 # cleanup data which are no longer needed
-# rm(dt_names)
-# rm(dt_combined)
+rm(dt_names)
+rm(dt_combined)
+rm(targetCols)
 
 # 3) Uses descriptive activity names to name the activities in the data set
 ###### Note this is not the most efficient way to perform this step. A more 
@@ -86,9 +84,9 @@ dt_extracted = dt_extracted[,which(!grepl("meanFreq()", colnames(dt_extracted)))
 ###### (the data in the final step) with only 180 observations, rather than
 ###### on the raw data. Nonetheless, this is how we do it....
 # read the training activities
-dt_training_activities = read.table(".\\data\\train\\y_train.txt")
+dt_training_activities = read.table(".\\train\\y_train.txt")
 # read the test activities
-dt_test_activities = read.table(".\\data\\test\\y_test.txt")
+dt_test_activities = read.table(".\\test\\y_test.txt")
 # combine the two
 dt_combined_activities = rbind(dt_training_activities, dt_test_activities)
 
@@ -119,7 +117,26 @@ rm(dt_combined_activities)
 # 4) Appropriately labels the data set with descriptive variable names. 
 # get the names of the columns
 varNames = colnames(dt_extracted)
-varNames[substring(varNames, 1, 1) == "t"] = function () { paste("Time domain", 
+# check the first character of the name. if equals "t", then replace "t" with "Time domain "
+varNames[substring(varNames, 1, 1) == "t"] = sub("t", "Time domain ", varNames[substring(varNames, 1, 1) == "t"])
+# check the first character of the name. if equals "f", then replace "t" with "Freq domain "
+varNames[substring(varNames, 1, 1) == "f"] = sub("f", "Freq domain ", varNames[substring(varNames, 1, 1) == "f"])
+# replace "Mag" with " Magnitude"
+varNames = gsub("Mag", " Magnitude", varNames)
+# add space to "Jerk" for readability
+varNames = gsub("Jerk", " Jerk", varNames)
+# replace "Acc" with " Acceleration" for readability
+varNames = gsub("Acc", " Acceleration", varNames)
+# replace "Gyro" with " Gyroscope" for readability
+varNames = gsub("Gyro", " Gyroscope", varNames)
+# add space to "BodyBody" for readability
+varNames = gsub("BodyBody", "Body Body", varNames)
+
+#replace existing variable names with better version
+names(dt_extracted) = varNames
+# free up the memory
+rm(varNames)
+
 # 5) From the data set in step 4, creates a second, independent tidy data set 
 # with the average of each variable for each activity and each subject.
 
@@ -129,9 +146,9 @@ varNames[substring(varNames, 1, 1) == "t"] = function () { paste("Time domain",
 # in the corresponding data file. Each subject is assigned a unique number, 
 # regardless of training or test group
 # read the training activities
-dt_training_subs = read.table(".\\data\\train\\subject_train.txt")
+dt_training_subs = read.table(".\\train\\subject_train.txt")
 # read the test activities
-dt_test_subs = read.table(".\\data\\test\\subject_test.txt")
+dt_test_subs = read.table(".\\test\\subject_test.txt")
 # combine the two
 dt_combined_subs = rbind(dt_training_subs, dt_test_subs)
 names(dt_combined_subs) = "Subject"
@@ -142,12 +159,14 @@ dt_extracted = cbind(dt_combined_subs, dt_extracted)
 # The aggregate function will create the average of each variable
 #for each activity and each subject
 aggdata <-aggregate( . ~ Subject + Activity, data =dt_extracted, FUN=mean)
+
 # save the aggregated data to a file. This file can be read using
-# data = read.csv("ActivityMeans.csv")
-write.csv(aggdata, "ActivityMeans.csv", row.names=FALSE)
+# data = read.csv("ActivityMeans.txt", sep = ",")
+write.table(aggdata, "ActivityMeans.txt", row.names=FALSE, sep = ",")
 
 # cleanup data no longer needed
 rm(dt_training_subs)
 rm(dt_test_subs)
 rm(dt_combined_subs)
 rm(dt_extracted)
+rm(aggdata)
