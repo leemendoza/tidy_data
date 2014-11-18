@@ -1,4 +1,18 @@
-tidy_data
-=========
+Files used for the tidy_data project:
 
-repository for the tidy data project in coursera's Getting and Cleaning Data course
+run_analysis.R - main script file
+codebook.md - explanation of variables in the output
+README.md - this file
+data files - 
+
+Details:
+run_analysis.R
+
+
+
+codebook.md
+
+
+
+
+README.md
