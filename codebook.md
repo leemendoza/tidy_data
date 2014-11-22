@@ -15,6 +15,7 @@ The script makes use of motion data captured from 30 persons wearing a smartphon
 - 'train/y_train.txt': Original activity labels for the training data.
 - 'test/X_test.txt': Test data set.
 - 'test/y_test.txt': original activity labels for the test data.
+- 'README.txt': readme file for original source data.
 
 The data in the 'train/subject_train.txt' and 'test/subject_test.txt' files were combined to form a composite set of source data. 
 
