@@ -6,7 +6,6 @@ codebook.md - explanation of variables in the output
 
 README.md - this file
 
-source data - folder with source data and documentation. See codebook.md for details
 
 ## Details:
 
